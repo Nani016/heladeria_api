@@ -1,0 +1,147 @@
+{
+  "info": {
+    "name": "Heladería - Gestión de Pedidos",
+    "description": "Ejecuta primero '0. Login'. El token se guarda solo en la variable {{token}} y se usa en las demás peticiones.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ]
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:5000" },
+    { "key": "token", "value": "" },
+    { "key": "admin_user", "value": "admin" },
+    { "key": "admin_pass", "value": "CAMBIA_ESTA_CLAVE" }
+  ],
+  "item": [
+    {
+      "name": "0. Login (guarda el token)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "  pm.collectionVariables.set('token', pm.response.json().access_token);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{admin_user}}\",\n  \"password\": \"{{admin_pass}}\"\n}"
+        },
+        "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+      }
+    },
+    {
+      "name": "Perfil (GET /auth/perfil)",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{base_url}}/auth/perfil", "host": ["{{base_url}}"], "path": ["auth", "perfil"] }
+      }
+    },
+    {
+      "name": "Crear usuario - solo admin (POST /auth/registro)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"maria\",\n  \"password\": \"MariaHelados2026\",\n  \"rol\": \"empleado\"\n}"
+        },
+        "url": { "raw": "{{base_url}}/auth/registro", "host": ["{{base_url}}"], "path": ["auth", "registro"] }
+      }
+    },
+    {
+      "name": "1. Crear pedido (POST /pedidos)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cliente\": \"Kevin Florez\",\n  \"tipo_producto\": \"Torta helada\",\n  \"sabor\": \"Chocolate\",\n  \"cantidad\": 20,\n  \"toppings\": \"Chispas de colores\",\n  \"fecha_entrega\": \"2027-03-20\",\n  \"hora_entrega\": \"16:00\",\n  \"tiempo_preparacion\": 180\n}"
+        },
+        "url": { "raw": "{{base_url}}/pedidos", "host": ["{{base_url}}"], "path": ["pedidos"] }
+      }
+    },
+    {
+      "name": "2. Pedidos por fecha (GET /pedidos/fecha/:fecha)",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{base_url}}/pedidos/fecha/2027-03-20", "host": ["{{base_url}}"], "path": ["pedidos", "fecha", "2027-03-20"] }
+      }
+    },
+    {
+      "name": "Listar pedidos (GET /pedidos)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/pedidos?pagina=1&por_pagina=20",
+          "host": ["{{base_url}}"], "path": ["pedidos"],
+          "query": [ { "key": "pagina", "value": "1" }, { "key": "por_pagina", "value": "20" } ]
+        }
+      }
+    },
+    {
+      "name": "Obtener pedido (GET /pedidos/:id)",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{base_url}}/pedidos/1", "host": ["{{base_url}}"], "path": ["pedidos", "1"] }
+      }
+    },
+    {
+      "name": "Actualizar pedido completo (PUT /pedidos/:id)",
+      "request": {
+        "method": "PUT",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cliente\": \"Kevin Florez\",\n  \"tipo_producto\": \"Torta helada\",\n  \"sabor\": \"Fresa\",\n  \"cantidad\": 25,\n  \"toppings\": \"Frutos rojos\",\n  \"fecha_entrega\": \"2027-03-21\",\n  \"hora_entrega\": \"17:00\",\n  \"tiempo_preparacion\": 200\n}"
+        },
+        "url": { "raw": "{{base_url}}/pedidos/1", "host": ["{{base_url}}"], "path": ["pedidos", "1"] }
+      }
+    },
+    {
+      "name": "Cambiar estado (PATCH /pedidos/:id/estado)",
+      "request": {
+        "method": "PATCH",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": { "mode": "raw", "raw": "{\n  \"estado\": \"En preparación\"\n}" },
+        "url": { "raw": "{{base_url}}/pedidos/1/estado", "host": ["{{base_url}}"], "path": ["pedidos", "1", "estado"] }
+      }
+    },
+    {
+      "name": "Pedidos próximos (GET /pedidos/proximos)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/pedidos/proximos?horas=48",
+          "host": ["{{base_url}}"], "path": ["pedidos", "proximos"],
+          "query": [ { "key": "horas", "value": "48" } ]
+        }
+      }
+    },
+    {
+      "name": "Eliminar pedido - solo admin (DELETE /pedidos/:id)",
+      "request": {
+        "method": "DELETE",
+        "url": { "raw": "{{base_url}}/pedidos/1", "host": ["{{base_url}}"], "path": ["pedidos", "1"] }
+      }
+    },
+    {
+      "name": "Logout (POST /auth/logout)",
+      "request": {
+        "method": "POST",
+        "url": { "raw": "{{base_url}}/auth/logout", "host": ["{{base_url}}"], "path": ["auth", "logout"] }
+      }
+    }
+  ]
+}
